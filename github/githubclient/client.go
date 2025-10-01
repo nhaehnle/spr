@@ -324,7 +324,7 @@ func matchPullRequestStack(
 
 		matches := git.BranchNameRegex.FindStringSubmatch(currpr.ToBranch)
 		if matches == nil {
-			panic(fmt.Errorf("invalid base branch for pull request:%s", currpr.ToBranch))
+			panic(fmt.Errorf("invalid base branch for pull request #%d: %s", currpr.Number, currpr.ToBranch))
 		}
 		nextCommitID := matches[2]
 
