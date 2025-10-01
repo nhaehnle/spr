@@ -6,7 +6,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"strings"
 
 	"github.com/ejoffe/rake"
 	"github.com/ejoffe/spr/config"
@@ -65,9 +64,6 @@ func ParseConfig(gitcmd git.GitInterface) *config.Config {
 }
 
 func CheckConfig(cfg *config.Config) error {
-	if strings.Contains(cfg.Repo.GitHubBranch, "/") {
-		return errors.New("Remote branch name must not contain backslashes '/'")
-	}
 	return nil
 }
 
