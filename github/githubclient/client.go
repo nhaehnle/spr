@@ -444,7 +444,7 @@ func formatStackMarkdown(commit git.Commit, stack []*github.PullRequest, showPrT
 			prTitle = ""
 		}
 
-		buf.WriteString(fmt.Sprintf("- %s#%d%s\n", prTitle, stack[i].Number, suffix))
+		buf.WriteString(fmt.Sprintf("- [%d/%d] %s#%d%s\n", i+1, len(stack), prTitle, stack[i].Number, suffix))
 	}
 
 	return buf.String()

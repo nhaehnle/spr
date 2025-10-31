@@ -566,8 +566,8 @@ It even includes some **markdown** formatting.
 ---
 
 **Stack**:
-- #2 ⬅
-- #1
+- [2/2] #2 ⬅
+- [1/2] #1
 
 
 ⚠️ *Part of a stack created by [spr](https://github.com/ejoffe/spr). Do not merge manually using the UI - doing so may have unexpected results.*`,
@@ -623,8 +623,8 @@ It even includes some **markdown** formatting.
 ---
 
 **Stack**:
-- Title B #2 ⬅
-- Title A #1
+- [2/2] Title B #2 ⬅
+- [1/2] Title A #1
 
 
 ⚠️ *Part of a stack created by [spr](https://github.com/ejoffe/spr). Do not merge manually using the UI - doing so may have unexpected results.*`,
