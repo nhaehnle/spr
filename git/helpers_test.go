@@ -1,8 +1,13 @@
 package git
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/ejoffe/spr/config"
+)
 
 func TestBranchNameRegex(t *testing.T) {
+	cfg := config.DefaultConfig()
 	tests := []struct {
 		input  string
 		branch string
@@ -12,12 +17,12 @@ func TestBranchNameRegex(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		matches := BranchNameRegex.FindStringSubmatch(tc.input)
-		if tc.branch != matches[1] {
-			t.Fatalf("expected: '%v', actual: '%v'", tc.branch, matches[1])
+		commitID := CommitIDFromBranchName(cfg, tc.input)
+		if commitID == nil {
+			t.Fatalf("expected commit ID to be extracted from %q, but got nil", tc.input)
 		}
-		if tc.commit != matches[2] {
-			t.Fatalf("expected: '%v', actual: '%v'", tc.commit, matches[2])
+		if *commitID != tc.commit {
+			t.Fatalf("expected: '%v', actual: '%v'", tc.commit, *commitID)
 		}
 	}
 }

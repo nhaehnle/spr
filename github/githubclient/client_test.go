@@ -522,9 +522,9 @@ func TestMatchPullRequestStack(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		repoConfig := &config.RepoConfig{}
+		config := config.DefaultConfig()
 		t.Run(tc.name, func(t *testing.T) {
-			actual := matchPullRequestStack(repoConfig, "master", tc.commits, tc.prs)
+			actual := matchPullRequestStack(config, "master", tc.commits, tc.prs)
 			require.Equal(t, tc.expect, actual)
 		})
 	}

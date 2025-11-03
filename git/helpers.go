@@ -29,7 +29,16 @@ func BranchNameFromCommit(cfg *config.Config, commit Commit) string {
 	return "spr/" + remoteBranchName + "/" + commit.CommitID
 }
 
-var BranchNameRegex = regexp.MustCompile(`spr/([a-zA-Z0-9_\-/\.]+)/([a-f0-9]{8})$`)
+var branchNameRegex = regexp.MustCompile(`spr/([a-zA-Z0-9_\-/\.]+)/([a-f0-9]{8})$`)
+
+func CommitIDFromBranchName(cfg *config.Config, branchName string) *string {
+	matches := branchNameRegex.FindStringSubmatch(branchName)
+	if matches == nil {
+		return nil
+	}
+
+	return &matches[2]
+}
 
 // GetLocalTopCommit returns the top unmerged commit in the stack
 //
