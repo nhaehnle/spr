@@ -143,12 +143,25 @@ func (sd *stackediff) UpdatePullRequests(ctx context.Context, reviewers []string
 	localCommits := alignLocalCommits(git.GetLocalCommitStack(sd.config, sd.gitcmd), githubInfo.PullRequests)
 	sd.profiletimer.Step("UpdatePullRequests::GetLocalCommitStack")
 
-	// close prs for deleted commits
-	var validPullRequests []*github.PullRequest
 	localCommitMap := map[string]*git.Commit{}
 	for _, commit := range localCommits {
 		localCommitMap[commit.CommitID] = &commit
 	}
+
+	// trim local commits by count and at first WIP
+	if count != nil && *count < uint(len(localCommits)) {
+		localCommits = localCommits[:*count]
+	}
+
+	for i, c := range localCommits {
+		if c.WIP {
+			localCommits = localCommits[:i]
+			break
+		}
+	}
+
+	// close prs for deleted commits
+	var validPullRequests []*github.PullRequest
 	for _, pr := range githubInfo.PullRequests {
 		if _, found := localCommitMap[pr.Commit.CommitID]; !found {
 			sd.github.CommentPullRequest(ctx, pr, "Closing pull request: commit has gone away")
@@ -200,9 +213,6 @@ func (sd *stackediff) UpdatePullRequests(ctx context.Context, reviewers []string
 	// iterate through local_commits and update pull_requests
 	var prevCommit *git.Commit
 	for commitIndex, c := range localCommits {
-		if c.WIP {
-			break
-		}
 		prFound := false
 		for _, pr := range githubInfo.PullRequests {
 			if c.CommitID == pr.Commit.CommitID {
@@ -229,10 +239,6 @@ func (sd *stackediff) UpdatePullRequests(ctx context.Context, reviewers []string
 				sd.addReviewers(ctx, pr, reviewers, assignable)
 			}
 			prevCommit = &localCommits[commitIndex]
-		}
-
-		if count != nil && (commitIndex+1) == int(*count) {
-			break
 		}
 	}
 	sd.profiletimer.Step("UpdatePullRequests::updatePullRequests")
