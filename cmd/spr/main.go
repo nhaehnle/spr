@@ -154,6 +154,9 @@ VERSION: fork of {{.Version}}
 					if c.Bool("no-rebase") {
 						os.Setenv("SPR_NOREBASE", "true")
 					}
+					if c.Bool("no-confirm") {
+						cfg.User.ConfirmUpdates = false
+					}
 					if c.IsSet("count") {
 						count := c.Uint("count")
 						stackedpr.UpdatePullRequests(ctx, c.StringSlice("reviewer"), &count)
@@ -178,6 +181,11 @@ VERSION: fork of {{.Version}}
 						Name:    "no-rebase",
 						Aliases: []string{"nr"},
 						Usage:   "Disable rebasing",
+					},
+					&cli.BoolFlag{
+						Name:    "no-confirm",
+						Aliases: []string{"nc"},
+						Usage:   "Skip confirmation prompt before updating",
 					},
 				},
 			},

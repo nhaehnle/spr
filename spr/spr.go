@@ -125,6 +125,63 @@ func alignLocalCommits(commits []git.Commit, prs []*github.PullRequest) []git.Co
 	return result
 }
 
+func (sd *stackediff) confirmUpdate(localCommits []git.Commit, githubInfo *github.GitHubInfo) bool {
+	type UpdatedPR struct {
+		commit   git.Commit
+		prNumber int
+	}
+
+	var newPRs []git.Commit
+	var updatedPRs []UpdatedPR
+
+	// Analyze each commit to determine if it's new or updating existing PR
+	for _, commit := range localCommits {
+		found := false
+		for _, pr := range githubInfo.PullRequests {
+			if commit.CommitID == pr.Commit.CommitID {
+				found = true
+				if commit.CommitHash != pr.Commit.CommitHash {
+					updatedPRs = append(updatedPRs, UpdatedPR{commit, pr.Number})
+				}
+				break
+			}
+		}
+		if !found {
+			newPRs = append(newPRs, commit)
+		}
+	}
+
+	// If nothing will change, no need to confirm
+	if len(newPRs) == 0 && len(updatedPRs) == 0 {
+		return true
+	}
+
+	// Display summary
+	fmt.Fprintf(sd.output, "The following commits will be updated:\n\n")
+
+	if len(newPRs) > 0 {
+		fmt.Fprintf(sd.output, "New PRs to create:\n")
+		for _, commit := range newPRs {
+			fmt.Fprintf(sd.output, "- %s: %s\n", commit.CommitID[:8], commit.Subject)
+		}
+		fmt.Fprintf(sd.output, "\n")
+	}
+
+	if len(updatedPRs) > 0 {
+		fmt.Fprintf(sd.output, "Existing PRs to update:\n")
+		for _, item := range updatedPRs {
+			fmt.Fprintf(sd.output, "- %s: %s (PR #%d)\n", item.commit.CommitID[:8], item.commit.Subject, item.prNumber)
+		}
+		fmt.Fprintf(sd.output, "\n")
+	}
+
+	fmt.Fprintf(sd.output, "Continue? [y/N]: ")
+	reader := bufio.NewReader(sd.input)
+	line, _ := reader.ReadString('\n')
+	line = strings.TrimSpace(line)
+	return strings.ToLower(line) == "y" || strings.ToLower(line) == "yes"
+}
+
 // UpdatePullRequests implements a stacked diff workflow on top of github.
 //
 //	Each time it's called it compares the local branch unmerged commits
@@ -160,6 +217,14 @@ func (sd *stackediff) UpdatePullRequests(ctx context.Context, reviewers []string
 		}
 	}
 
+	// Confirmation check
+	if sd.config.User.ConfirmUpdates {
+		if !sd.confirmUpdate(localCommits, githubInfo) {
+			fmt.Fprintf(sd.output, "Update cancelled.\n")
+			return
+		}
+	}
+
 	// close prs for deleted commits
 	var validPullRequests []*github.PullRequest
 	for _, pr := range githubInfo.PullRequests {
@@ -171,6 +236,10 @@ func (sd *stackediff) UpdatePullRequests(ctx context.Context, reviewers []string
 		}
 	}
 	githubInfo.PullRequests = validPullRequests
+
+	if len(localCommits) == 0 {
+		return
+	}
 
 	if commitsReordered(localCommits, githubInfo.PullRequests) {
 		wg := new(sync.WaitGroup)
