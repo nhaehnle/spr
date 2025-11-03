@@ -26,13 +26,18 @@ func GetLocalBranchName(gitcmd GitInterface) string {
 
 func BranchNameFromCommit(cfg *config.Config, commit Commit) string {
 	remoteBranchName := cfg.Repo.GitHubBranch
-	return "spr/" + remoteBranchName + "/" + commit.CommitID
+	return cfg.Repo.PrBranchPrefix + "spr/" + remoteBranchName + "/" + commit.CommitID
 }
 
-var branchNameRegex = regexp.MustCompile(`spr/([a-zA-Z0-9_\-/\.]+)/([a-f0-9]{8})$`)
+var branchNameRegex = regexp.MustCompile(`^spr/([a-zA-Z0-9_\-/\.]+)/([a-f0-9]{8})$`)
 
 func CommitIDFromBranchName(cfg *config.Config, branchName string) *string {
-	matches := branchNameRegex.FindStringSubmatch(branchName)
+	if !strings.HasPrefix(branchName, cfg.Repo.PrBranchPrefix) {
+		return nil
+	}
+
+	remainder := branchName[len(cfg.Repo.PrBranchPrefix):]
+	matches := branchNameRegex.FindStringSubmatch(remainder)
 	if matches == nil {
 		return nil
 	}

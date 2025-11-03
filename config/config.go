@@ -39,6 +39,8 @@ type RepoConfig struct {
 
 	ShowPrTitlesInStack    bool `default:"false" yaml:"showPrTitlesInStack"`
 	BranchPushIndividually bool `default:"false" yaml:"branchPushIndividually"`
+
+	PrBranchPrefix string `default:"" yaml:"prBranchPrefix"`
 }
 
 type UserConfig struct {
