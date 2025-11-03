@@ -529,7 +529,7 @@ func getSectionOfPRTemplate(text, searchString string, returnMatch int) (string,
 func addManualMergeNotice(body string) string {
 	return body + "\n\n" +
 		"⚠️ *Part of a stack created by [spr](https://github.com/ejoffe/spr). " +
-		"Do not merge manually using the UI - doing so may have unexpected results.*"
+		"Merging this PR using the GitHub UI may have unexpected results.*"
 }
 
 func (c *client) UpdatePullRequest(ctx context.Context, gitcmd git.GitInterface, pullRequests []*github.PullRequest, pr *github.PullRequest, commit git.Commit, prevCommit *git.Commit) {

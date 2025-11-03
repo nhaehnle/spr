@@ -570,7 +570,7 @@ It even includes some **markdown** formatting.
 - [1/2] #1
 
 
-⚠️ *Part of a stack created by [spr](https://github.com/ejoffe/spr). Do not merge manually using the UI - doing so may have unexpected results.*`,
+⚠️ *Part of a stack created by [spr](https://github.com/ejoffe/spr). Merging this PR using the GitHub UI may have unexpected results.*`,
 			commit: descriptiveCommit,
 			stack: []*github.PullRequest{
 				{Number: 1, Commit: simpleCommit},
@@ -627,7 +627,7 @@ It even includes some **markdown** formatting.
 - [1/2] Title A #1
 
 
-⚠️ *Part of a stack created by [spr](https://github.com/ejoffe/spr). Do not merge manually using the UI - doing so may have unexpected results.*`,
+⚠️ *Part of a stack created by [spr](https://github.com/ejoffe/spr). Merging this PR using the GitHub UI may have unexpected results.*`,
 			commit: descriptiveCommit,
 			stack: []*github.PullRequest{
 				{Number: 1, Commit: simpleCommit, Title: "Title A"},
