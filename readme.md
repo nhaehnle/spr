@@ -153,7 +153,10 @@ Starting a new stack works by creating a new branch. For example, if you want to
 Configuration
 -------------
 When the script is run for the first time two config files are created.
-Repository configuration is saved to .spr.yml in the repository base directory. 
+Repository configuration is saved to .spr.yml in the repository base directory.
+Per-remote repository configuration is saved to .{remote}.spr.yml in the repository
+base directory and overrides the common configuration. The remote is determined
+via the current branch's upstream as set by `git branch --set-upstream`.
 User specific configuration is saved to .spr.yml in the user home directory.
 
 | Repository Config       | Type | Default    | Description                                                                       |
@@ -165,6 +168,7 @@ User specific configuration is saved to .spr.yml in the user home directory.
 | githubRemote            | str  | origin     | github remote name to use |
 | githubBranch            | str  | main       | github branch for pull request target |
 | githubHost              | str  | github.com | github host, can be updated for github enterprise use case |
+| githubToken             | str  |            | OAuth token to use with the github API |
 | mergeMethod             | str  | rebase     | merge method, valid values: [rebase, squash, merge] |
 | mergeQueue              | bool | false      | use GitHub merge queue to merge pull requests |
 | prTemplatePath          | str  |            | path to PR template (e.g. .github/PULL_REQUEST_TEMPLATE/pull_request_template.md) |

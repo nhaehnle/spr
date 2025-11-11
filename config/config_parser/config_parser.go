@@ -1,7 +1,6 @@
 package config_parser
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -15,23 +14,44 @@ import (
 func ParseConfig(gitcmd git.GitInterface) *config.Config {
 	cfg := config.EmptyConfig()
 
+	repoCommonConfigPath, repoRemoteConfigPath := getRepoConfigFilePath(gitcmd)
+
+	fmt.Println("common", repoCommonConfigPath)
+	fmt.Println("remote", repoRemoteConfigPath)
+
 	rake.LoadSources(cfg.Repo,
 		rake.DefaultSource(),
 		NewGitHubRemoteSource(cfg, gitcmd),
-		rake.YamlFileSource(RepoConfigFilePath(gitcmd)),
 		NewRemoteBranchSource(gitcmd),
 	)
+
+	_, err := os.Stat(repoCommonConfigPath)
+	if err == nil {
+		rake.LoadSources(cfg.Repo,
+			rake.YamlFileSource(repoCommonConfigPath),
+		)
+	}
+
+	if repoRemoteConfigPath != "" {
+		_, err = os.Stat(repoRemoteConfigPath)
+		if err == nil {
+			rake.LoadSources(cfg.Repo,
+				rake.YamlFileSource(repoRemoteConfigPath),
+			)
+		}
+	}
+
 	if cfg.Repo.GitHubHost == "" {
-		fmt.Println("unable to auto configure repository host - must be set manually in .spr.yml")
+		fmt.Println("unable to auto configure repository host - must be set manually in .spr.yml or .{remote}.spr.yml")
 		os.Exit(2)
 	}
 	if cfg.Repo.GitHubRepoOwner == "" {
-		fmt.Println("unable to auto configure repository owner - must be set manually in .spr.yml")
+		fmt.Println("unable to auto configure repository owner - must be set manually in .spr.yml or .{remote}.spr.yml")
 		os.Exit(3)
 	}
 
 	if cfg.Repo.GitHubRepoName == "" {
-		fmt.Println("unable to auto configure repository name - must be set manually in .spr.yml")
+		fmt.Println("unable to auto configure repository name - must be set manually in .spr.yml or .{remote}.spr.yml")
 		os.Exit(4)
 	}
 
@@ -50,16 +70,6 @@ func ParseConfig(gitcmd git.GitInterface) *config.Config {
 	rake.LoadSources(cfg.State,
 		rake.YamlFileWriter(InternalConfigFilePath()))
 
-	// init case : if yaml config files not found : create them
-	if _, err := os.Stat(RepoConfigFilePath(gitcmd)); errors.Is(err, os.ErrNotExist) {
-		rake.LoadSources(cfg.Repo,
-			rake.YamlFileWriter(RepoConfigFilePath(gitcmd)))
-	}
-
-	if _, err := os.Stat(UserConfigFilePath()); errors.Is(err, os.ErrNotExist) {
-		rake.LoadSources(cfg.User,
-			rake.YamlFileWriter(UserConfigFilePath()))
-	}
 	return cfg
 }
 
@@ -67,10 +77,18 @@ func CheckConfig(cfg *config.Config) error {
 	return nil
 }
 
-func RepoConfigFilePath(gitcmd git.GitInterface) string {
+func getRepoConfigFilePath(gitcmd git.GitInterface) (commonConfig string, remoteConfig string) {
 	rootdir := gitcmd.RootDir()
-	filepath := filepath.Clean(path.Join(rootdir, ".spr.yml"))
-	return filepath
+	commonConfig = filepath.Clean(path.Join(rootdir, ".spr.yml"))
+
+	remote, _, err := git.GetTrackedUpstream(gitcmd)
+	if err == nil {
+		remoteConfig = filepath.Clean(path.Join(rootdir, fmt.Sprintf(".%s.spr.yml", remote)))
+	} else {
+		remoteConfig = ""
+	}
+
+	return commonConfig, remoteConfig
 }
 
 func UserConfigFilePath() string {

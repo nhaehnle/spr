@@ -19,6 +19,7 @@ type RepoConfig struct {
 	GitHubRepoOwner string `yaml:"githubRepoOwner"`
 	GitHubRepoName  string `yaml:"githubRepoName"`
 	GitHubHost      string `default:"github.com" yaml:"githubHost"`
+	GitHubToken     string `yaml:"githubToken"`
 
 	GitHubRemote string `default:"origin" yaml:"githubRemote"`
 	GitHubBranch string `default:"main" yaml:"githubBranch"`

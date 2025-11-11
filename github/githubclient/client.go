@@ -119,9 +119,13 @@ func findToken(githubHost string) string {
 }
 
 const tokenHelpText = `
-No GitHub OAuth token found! You can either create one
-at https://%s/settings/tokens and set the GITHUB_TOKEN environment variable,
-or use the official "gh" CLI (https://cli.github.com) config to log in:
+No GitHub OAuth token found! You can create one
+at https://%s/settings/tokens and set the GITHUB_TOKEN environment variable
+or add it into the repository .spr.yml or .{remote}.spr.yml configuration:
+
+	githubToken: <your token>
+
+Alternatively, use the official "gh" CLI (https://cli.github.com) config to log in:
 
 	$ gh auth login --insecure-storage
 
@@ -137,7 +141,10 @@ so if you already use that, spr will automatically pick up your token.
 `
 
 func NewGitHubClient(ctx context.Context, config *config.Config) *client {
-	token := findToken(config.Repo.GitHubHost)
+	token := config.Repo.GitHubToken
+	if token == "" {
+		token = findToken(config.Repo.GitHubHost)
+	}
 	if token == "" {
 		fmt.Printf(tokenHelpText, config.Repo.GitHubHost)
 		os.Exit(3)
