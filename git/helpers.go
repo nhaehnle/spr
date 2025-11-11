@@ -45,6 +45,34 @@ func CommitIDFromBranchName(cfg *config.Config, branchName string) *string {
 	return &matches[2]
 }
 
+var _remoteBranchRegex = regexp.MustCompile(`^## ([A-Za-z0-9_./-]+)\.\.\.([^\s]+)`)
+
+// GetTrackedUpstream determines the tracked remote and branch from git status output.
+// Returns an error if git failed or there is no tracked upstream.
+func GetTrackedUpstream(gitcmd GitInterface) (remote string, branch string, err error) {
+	var output string
+	err = gitcmd.Git("status -b --porcelain -u no", &output)
+	if err != nil {
+		return "", "", err
+	}
+
+	matches := _remoteBranchRegex.FindStringSubmatch(output)
+	if matches == nil {
+		return "", "", fmt.Errorf("no tracked upstream branch found")
+	}
+
+	/* matches[2] is e.g. "myremote/myuser/mybranch".  Split at the
+	   first '/' to get the remote name and the remote branch.  */
+	remoteRef := matches[2]
+	parts := strings.SplitN(remoteRef, "/", 2)
+
+	if len(parts) < 2 {
+		return "", "", fmt.Errorf("tracked upstream branch is not of expected format: %s", remoteRef)
+	}
+
+	return parts[0], parts[1], nil
+}
+
 // GetLocalTopCommit returns the top unmerged commit in the stack
 //
 // return nil if there are no unmerged commits in the stack
