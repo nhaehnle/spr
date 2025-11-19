@@ -12,6 +12,8 @@ Checkout my company [Inigo](https://www.inigo.io) for the best holistic platform
 
 # Stacked Pull Requests on GitHub
 
+**NOTE:** This is a personal fork. Send me an email if you find it useful. This branch may get rebased every once in a while.
+
 Easily manage stacks of pull requests on GitHub. 
 `git spr` is a client side tool that achieves a simple streamlined stacked diff workflow using github pull requests and branches. `git spr` manages your pull request stacks for you, so you don't have to. 
 

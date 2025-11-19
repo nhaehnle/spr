@@ -535,7 +535,7 @@ func getSectionOfPRTemplate(text, searchString string, returnMatch int) (string,
 
 func addManualMergeNotice(body string) string {
 	return body + "\n\n" +
-		"⚠️ *Part of a stack created by [spr](https://github.com/ejoffe/spr). " +
+		"⚠️ *Part of a stack created by [spr](https://github.com/nhaehnle/spr). " +
 		"Merging this PR using the GitHub UI may have unexpected results.*"
 }
 
